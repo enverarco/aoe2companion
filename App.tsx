@@ -6,7 +6,7 @@
 
 import 'react-native-gesture-handler';
 import {NavigationContainer} from '@react-navigation/native';
-import React from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import MainPage from './src/view/main.page';
 import {StyleSheet, Text, View, YellowBox} from 'react-native';
 import Search from './src/view/components/search';
@@ -193,7 +193,52 @@ function ConditionalTester({children}: any) {
     return children;
 }
 
+
+const useTimeout = (
+    callback: () => void, // function to call. No args passed.
+    // if you create a new callback each render, then previous callback will be cancelled on render.
+    timeout: number = 0, // delay, ms (default: immediately put into JS Event Queue)
+): () => void => {
+    const timeoutIdRef = useRef<NodeJS.Timeout>();
+    const cancel = useCallback(
+        () => {
+            const timeoutId = timeoutIdRef.current;
+            if (timeoutId) {
+                timeoutIdRef.current = undefined;
+                clearTimeout(timeoutId);
+            }
+        },
+        [timeoutIdRef],
+    );
+
+    useEffect(
+        () => {
+            timeoutIdRef.current = setTimeout(callback, timeout);
+            return cancel;
+        },
+        [callback, timeout, cancel],
+    );
+
+    return cancel;
+}
+
+
+
 export default function App() {
+   const [auth, setAuth] = useState(false);
+   const timeoutCancel = useTimeout(() => setAuth(true), 40000);
+
+   // console.log("loading..");
+
+    if (!auth) {
+        return <AppLoading
+
+        ><Text>Hello</Text></AppLoading>;
+    }
+    // console.log("loading..ready");
+
+    // return <AppLoading/>;
+
     return (
         <NavigationContainer linking={linking}>
             <ConditionalTester>
