@@ -1,0 +1,26 @@
+{
+  "name": "hello-nodejs-typescript",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/server.js",
+  "scripts": {
+    "nodemon": "nodemon",
+    "build-ts": "tsc",
+    "start": "npm run serve",
+    "serve": "node dist/server.js",
+    "watch-node": "nodemon dist/server.js",
+    "watch-ts": "tsc -w",
+    "strings": "ts-node src/strings.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/cheerio": "^0.22.18",
+    "nodemon": "^1.18.3",
+    "tslint": "^5.11.0",
+    "typescript": "^3.0.1"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3"
+  }
+}
