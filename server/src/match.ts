@@ -1,5 +1,6 @@
 import express from 'express';
 import WebSocket from 'ws';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 import {ILastMatchRaw, ILobbyMatchRaw, IMatchRaw, makeQueryString, minifyUserId} from "./util";
 import fetch from "node-fetch";
 import {createDB} from "./db";
@@ -37,9 +38,29 @@ export function sleep(ms: number) {
     });
 }
 
-const ws = new WebSocket('wss://aoe2.net/ws', {
+// const ws = new WebSocket('wss://aoe2.net/ws', {
+//     origin: 'https://aoe2.net',
+// });
+
+class MyWebSocket extends WebSocket {
+    constructor(url: any, protocols: any) {
+        console.log('url', url);
+        console.log('protocol', protocols);
+        super(url, protocols, {
+            origin: 'https://aoe2.net',
+        })
+    }
+}
+
+const options = {
+    WebSocket: MyWebSocket,
+    // 1-5 min reconnect delay
+    minReconnectionDelay: 60 * 1000,
+    maxReconnectionDelay: 60 * 1000 * 5,
+    reconnectionDelayGrowFactor: 1.3,
     origin: 'https://aoe2.net',
-});
+};
+const ws = new ReconnectingWebSocket('wss://aoe2.net/ws', [], options);
 
 async function fetchIntoJson(url: string) {
     sentRequests++;
@@ -247,14 +268,14 @@ function onUpdate(updates: ILobbyMatchRaw[]) {
     }
 }
 
-ws.on('open', () => {
+ws.addEventListener('open', () => {
     // ws.send(JSON.stringify({"message":"subscribe","subscribe":[0]})); // subscribe chat
     // if (process.env.LOCAL === 'true') {
         ws.send(JSON.stringify({"message":"subscribe","subscribe":[813780]})); // subscribe de lobbies
     // }
 });
 
-ws.on('message', (data) => {
+ws.addEventListener('message', (data) => {
     const message = JSON.parse(data as any);
     console.log(message.data);
 
@@ -274,11 +295,11 @@ ws.on('message', (data) => {
     }
 });
 
-ws.on('error', (e) => {
+ws.addEventListener('error', (e) => {
     console.log('error', (e as any).message);
 });
 
-ws.on('close', (e: any) => {
+ws.addEventListener('close', (e: any) => {
     console.log('close', e.code, e.reason);
 });
 

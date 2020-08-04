@@ -15,14 +15,15 @@
       "esModuleInterop": true,
       "importHelpers": true,
       "resolveJsonModule": true,
-      "target": "es5",
+      "target": "es6",
       "strict": true,
       "strictNullChecks": false,
       "typeRoots": [
         "node_modules/@types"
       ],
       "lib": [
-        "es2018"
+        "es2018",
+        "dom"
       ]
     },
     "include": [
